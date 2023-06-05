@@ -40,7 +40,7 @@ function animatePress(currentColor){
 
 }
 
-$(document).keydown(function(){
+$(document).click(function(){
     if(!started){
         $("#level-title").text("Level " + level);
         started=true;
