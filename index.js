@@ -1,83 +1,78 @@
-var allDrums=document.querySelectorAll(".drum")
-var allsoundsArray=[];
-for(var i=0;i<allDrums.length;i++){
-    allDrums[i].addEventListener("click",function(){
-        var buttonInnerHTML=this.innerHTML;
-        makesound(buttonInnerHTML);
-        buttonAnimation(buttonInnerHTML);
-    });
+
+var buttonColors=["red","blue","green","yellow"];
+var gamePattern=[];
+var userClickedPattern=[];
+var level=0;
+var click=0;
+var started=false;
+
+function nextSequence(){
+    level=level+1;
+    userClickedPattern=[];
+    $("#level-title").text("Level "+level);
+    setTimeout(2000);
+    var randomMove=Math.floor(Math.random()*4);
+    var randomChosenColor=buttonColors[randomMove];
+    $("#" + randomChosenColor).fadeIn(100).fadeOut(100).fadeIn(100);
+    playSound(randomChosenColor);
+    gamePattern.push(randomChosenColor);
+
 }
 
-document.addEventListener("keydown",(event)=>{
-    makesound(event.key);
-    buttonAnimation(event.key);
+
+$(".btn").click(function () {
+
+    var userChosenColor=$(this).attr("id");
+    userClickedPattern.push(userChosenColor);
+    playSound(userChosenColor);
+    animatePress(userChosenColor);
+    checkAnswer(userClickedPattern.length-1)
 });
 
-document.querySelector(".play").addEventListener("click",function(){
-    buttonAnimation("play");
-    function playSoundWithDelay(index) {
-        if (index >= allsoundsArray.length) {
-          return;
-        }
-        allsoundsArray[index].play();
-        setTimeout(function() {
-          playSoundWithDelay(index + 1); 
-        }, 500); 
-      }
-    
-    playSoundWithDelay(0); 
-})
+function playSound(name){
+    var audio = new Audio("sounds/" + name + ".mp3");
+    audio.play();
+}
 
-document.querySelector(".startover").addEventListener("click",()=>{
-    buttonAnimation("startover");
-    allsoundsArray=[]} );
+function animatePress(currentColor){
+    $("#"+currentColor).addClass("pressed");
+    setTimeout(()=> $("#"+currentColor).removeClass("pressed"),100);
 
-function makesound(x){
-    switch (x) {
-        case "w":
-            var tom1=new Audio("./sounds/tom-1.mp3")
-            tom1.play();
-            allsoundsArray.push(tom1);
-            break;
-        case "a":
-            var tom2=new Audio("./sounds/tom-2.mp3")
-            tom2.play();
-            allsoundsArray.push(tom2);
-            break;
-        case "s":
-            var tom3=new Audio("./sounds/tom-3.mp3")
-            tom3.play();
-            allsoundsArray.push(tom3);
-            break;
-        case "d":
-            var tom4=new Audio("./sounds/tom-4.mp3")
-            tom4.play();
-            allsoundsArray.push(tom4);
-            break;
-        case "j":
-            var crash=new Audio("./sounds/crash.mp3")
-            crash.play();
-            allsoundsArray.push(crash);
-            break;
-        case "k":
-            var kick=new Audio("./sounds/kick-bass.mp3")
-            kick.play();
-            allsoundsArray.push(kick);
-            break;
-        case "l":
-            var snare=new Audio("./sounds/snare.mp3")
-            snare.play();
-            allsoundsArray.push(snare);
-            break;
-        default:
-            break;
+}
+
+$("h1").click(function(){
+    if(!started){
+        $("#level-title").text("Level " + level);
+        started=true;
+        nextSequence();
     }
+});
+
+function checkAnswer(color){
+        if(gamePattern[color]===userClickedPattern[color]){
+            console.log("success");
+            if(userClickedPattern.length===gamePattern.length){
+                setTimeout(nextSequence,1000);
+            }
+        }
+        else{
+            console.log("fail");
+            handleLoss();
+        }
+    
 }
 
-function buttonAnimation(key){
-    var activeButton=document.querySelector("."+key);
-    activeButton.classList.add("pressed");
-    setTimeout(()=>activeButton.classList.remove("pressed"),100);
+function handleLoss(){
+    $("body").addClass("game-over");
+    playSound("wrong");
+    setTimeout(()=> $("body").removeClass("game-over"),1500)
+    $("#level-title").text("You Lost :(");
+    gamePattern=[];
+    userClickedPattern=[];
+    level=0;
+    setTimeout(() => {
+        $("#level-title").text("Press Any Key To Start");
+        started=false;
+    }, 1500);
+    
 }
-
-
